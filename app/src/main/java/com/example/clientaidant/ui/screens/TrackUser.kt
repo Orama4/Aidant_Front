@@ -240,7 +240,11 @@ fun TrackUser() {
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        Column {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 32.dp),
+                        ) {
                             component1(
                                 imageRes = R.drawable.group1,
                                 text = "Obstacle detected ahead",

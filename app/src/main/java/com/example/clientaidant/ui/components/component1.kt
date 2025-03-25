@@ -18,17 +18,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clientaidant.ui.theme.AppColors
 import com.example.clientaidant.ui.theme.PlusJakartaSans
 
 @Composable
-fun component1(imageRes: Int,text: String,color: Color) {
+fun component1(imageRes: Int,text: String,color: Color,  fontSize: TextUnit = 16.sp ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
 
@@ -42,9 +42,9 @@ fun component1(imageRes: Int,text: String,color: Color) {
         Text(
             text = text,
             color = color,
-            fontSize = 16.sp,
+            fontSize = fontSize,
             textAlign = TextAlign.Start,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight.Medium,
             fontFamily = PlusJakartaSans,
         )
 
