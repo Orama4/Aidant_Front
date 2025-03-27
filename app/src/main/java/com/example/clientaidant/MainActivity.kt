@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.clientaidant.ui.screens.OnboardingScreen
 import com.example.clientaidant.ui.screens.PreviewFullScreenBackground
 import com.example.clientaidant.ui.theme.ClientAidantTheme
 
@@ -20,9 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ClientAidantTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    PreviewFullScreenBackground()
-                }
+                OnboardingScreen()
             }
         }
     }
