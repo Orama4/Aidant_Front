@@ -20,7 +20,9 @@ sealed class Screen(val route: String) {
 fun NavigationController(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Tracking.route
+        startDestination = Screen.Tracking.route,
+
+
     ) {
         composable(Screen.Home.route) {   HomeScreen(
             userName = "John", // Example user name

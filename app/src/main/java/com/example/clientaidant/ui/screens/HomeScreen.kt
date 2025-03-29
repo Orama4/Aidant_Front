@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -65,16 +66,38 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(WindowInsets.statusBars.asPaddingValues())
             .background(Color.White)
-            .padding(bottom = 16.dp)
     ) {
         TopAppBarSection(
             userName = userName,
             notificationCount = notificationCount,
             onBackClick = onBackClick,
-            onNotificationClick = onNotificationClick
-        )
+            onNotificationClick = onNotificationClick,
 
+        )
+        Text(
+            text = buildAnnotatedString {
+                append("Hey $userName, ")
+                withStyle(style = androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("Good Afternoon!")
+                }
+            },
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+        )
+        SearchBar(
+            searchText = searchText,
+            onSearchTextChanged = {
+                searchText = it
+                onUserSearch(it)
+            }
+        )
+        Text(
+            text = "Assisted Users",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(vertical = 8.dp,horizontal = 16.dp)
+        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,23 +105,9 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                SearchBar(
-                    searchText = searchText,
-                    onSearchTextChanged = {
-                        searchText = it
-                        onUserSearch(it)
-                    }
-                )
-            }
 
-            item {
-                Text(
-                    text = "Assisted Users",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                )
-            }
+
+
 
             if (onTheMoveUsers.isNotEmpty()) {
                 item {
@@ -168,16 +177,7 @@ fun TopAppBarSection(
             )
         }
 
-        Text(
-            text = buildAnnotatedString {
-                append("Hey $userName, ")
-                withStyle(style = androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append("Good Afternoon!")
-                }
-            },
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
-        )
+
 
         BadgedBox(
             badge = {
@@ -193,10 +193,10 @@ fun TopAppBarSection(
                 onClick = onNotificationClick,
                 modifier = Modifier
                     .size(40.dp)
-                    .background(Color(0xFF1A237E), CircleShape)
+                    .background(Color(0xFF181C2E), CircleShape)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications",
                     tint = Color.White
                 )
@@ -215,7 +215,9 @@ fun SearchBar(
         onValueChange = onSearchTextChanged,
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp),
+            .height(70.dp)
+            .padding(horizontal = 20.dp)
+            .background(Color(0xFFF6F6F6), RoundedCornerShape(10.dp)),
         placeholder = { Text("Search users", color = Color.Gray) },
         leadingIcon = {
             Icon(
@@ -224,10 +226,12 @@ fun SearchBar(
                 tint = Color.Gray
             )
         },
-        shape = RoundedCornerShape(25.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = OrangeAccent
+            focusedBorderColor = OrangeAccent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent
         ),
         singleLine = true
     )

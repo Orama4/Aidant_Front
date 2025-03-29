@@ -148,7 +148,7 @@ fun AnimatedBottomNavigationBar(navController: NavHostController) {
                                 cutoutHorizontalOffset = animatedCutoutOffsetPx
                             )
                         )
-                        .background(Color.White)
+                        .background(Color(0xFFF6F6F6))
                 )
             }
             Row(
