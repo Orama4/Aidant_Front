@@ -76,7 +76,7 @@ fun AnimatedBottomNavigationBar(navController: NavHostController) {
         Screen.Home to "Home",
         Screen.Tracking to "Tracking",
         Screen.Notifications to "Notifications",
-        Screen.Account to "Account"
+        Screen.Main_account to "Account"
     )
 
     val currentRoute = currentRoute(navController)
@@ -87,7 +87,7 @@ fun AnimatedBottomNavigationBar(navController: NavHostController) {
                 Screen.Home.route -> 0
                 Screen.Tracking.route -> 1
                 Screen.Notifications.route -> 2
-                Screen.Account.route -> 3
+                Screen.Main_account.route -> 3
                 else -> 0
             }
         }
@@ -167,7 +167,7 @@ fun AnimatedBottomNavigationBar(navController: NavHostController) {
                             Screen.Home -> R.drawable.d_home
                             Screen.Tracking -> R.drawable.d_tracking
                             Screen.Notifications -> R.drawable.d_notification
-                            Screen.Account -> R.drawable.d_account
+                            Screen.Main_account -> R.drawable.d_account
                             else -> R.drawable.d_home
                         }),
                         label = label,

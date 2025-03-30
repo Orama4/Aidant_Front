@@ -1,8 +1,3 @@
-package com.example.myapplication // Replace with your package name
-
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
@@ -12,8 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,7 +14,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.Notes // Alternative for Report Bug
-import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.* // Import base filled icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
@@ -32,10 +24,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -44,23 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.clientaidant.ui.theme.AppColors
+import com.example.clientaidant.ui.theme.ClientAidantTheme
 
-// --- Refined Color Scheme (Light & Modern) ---
-val BackgroundColor = Color(0xFFFDFEFF) // Slightly off-white
-val SurfaceColor = Color.White
-val PrimaryAccentOrange = Color(0xFFFF7B00)
-val SecondaryAccentBlue = Color(0xFF007AFF) // Vibrant Blue
-val PrimaryText = Color(0xFF1D1D1F)
-val SecondaryText = Color(0xFF8A8A8E)
-val BorderColor = Color(0xFFEAEAEA)
-val ErrorColor = Color(0xFFFF3B30)
-val SuccessColor = Color(0xFF34C759) // Standard success green
-
-// --- Data Classes (Example data structures - unchanged) ---
 data class UserProfile(
     val name: String,
     val email: String,
@@ -73,124 +50,10 @@ data class FaqItem(
     val answer: String
 )
 
-// --- Navigation Routes (unchanged) ---
-object AccountDestinations {
-    const val MAIN_ACCOUNT = "main_account"
-    const val PROFILE_INFO = "profile_info"
-    const val CHANGE_PASSWORD = "change_password"
-    const val PUSH_NOTIFICATIONS = "push_notifications"
-    const val FAQ = "faq"
-    const val CONTACT_SUPPORT = "contact_support"
-    const val REPORT_BUG = "report_bug"
-    const val LOGOUT_DELETE = "logout_delete"
-}
-
-// --- Main Activity (unchanged logic, uses new theme) ---
 
 
-// --- *** NEW Custom Theme (Light & Modern) *** ---
-@Composable
-fun MyModernAppTheme(content: @Composable () -> Unit) {
-    val customColorScheme = lightColorScheme( // Using lightColorScheme as base
-        primary = PrimaryAccentOrange,
-        onPrimary = Color.White,
-        primaryContainer = PrimaryAccentOrange.copy(alpha = 0.1f), // Light orange background
-        onPrimaryContainer = PrimaryAccentOrange,
-        secondary = SecondaryAccentBlue,
-        onSecondary = Color.White,
-        secondaryContainer = SecondaryAccentBlue.copy(alpha = 0.1f), // Light blue background
-        onSecondaryContainer = SecondaryAccentBlue,
-        tertiary = SecondaryAccentBlue, // Can use tertiary if needed
-        onTertiary = Color.White,
-        background = BackgroundColor,
-        onBackground = PrimaryText,
-        surface = SurfaceColor,
-        onSurface = PrimaryText,
-        surfaceVariant = Color(0xFFF5F5F7), // Slightly different light gray for variants
-        onSurfaceVariant = SecondaryText,
-        error = ErrorColor,
-        onError = Color.White,
-        errorContainer = ErrorColor.copy(alpha = 0.1f),
-        onErrorContainer = ErrorColor,
-        outline = BorderColor, // Subtle borders
-        outlineVariant = Color(0xFFD1D1D6) // Slightly darker border if needed
-    )
 
-    MaterialTheme(
-        colorScheme = customColorScheme,
-        typography = MaterialTheme.typography.copy( // Example: Customize typography slightly
-            bodyLarge = MaterialTheme.typography.bodyLarge.copy(color = PrimaryText),
-            titleMedium = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = PrimaryText),
-            // Add other typography customizations here
-        ),
-        shapes = MaterialTheme.shapes.copy( // Slightly more rounded shapes
-            extraSmall = RoundedCornerShape(8.dp),
-            small = RoundedCornerShape(12.dp), // Used for buttons, text fields
-            medium = RoundedCornerShape(16.dp), // Used for cards
-            large = RoundedCornerShape(20.dp)
-        ),
-        content = content
-    )
-}
 
-// --- Navigation Host (Unchanged logic, uses new theme context) ---
-@Composable
-fun AccountScreenNavHost(
-    navController: NavHostController = rememberNavController(),
-    userProfile: UserProfile,
-    pushNotificationsEnabled: Boolean,
-    faqs: List<FaqItem>,
-    contactEmail: String,
-    contactPhone: String,
-    onSaveProfile: (UserProfile) -> Unit,
-    onChangePassword: (String, String) -> Boolean,
-    onNotificationToggle: (Boolean) -> Unit,
-    onBugSubmit: (String) -> Boolean,
-    onLogout: () -> Unit,
-    onDeleteAccount: () -> Unit,
-) {
-    NavHost(
-        navController = navController,
-        startDestination = AccountDestinations.MAIN_ACCOUNT,
-        modifier = Modifier.background(MaterialTheme.colorScheme.background) // Ensure NavHost bg
-    ) {
-        composable(AccountDestinations.MAIN_ACCOUNT) {
-            AccountMainScreen(navController = navController)
-        }
-        composable(AccountDestinations.PROFILE_INFO) {
-            ProfileInfoScreen(navController = navController, profile = userProfile, onSave = { updatedProfile ->
-                onSaveProfile(updatedProfile)
-                navController.navigateUp()
-            })
-        }
-        composable(AccountDestinations.CHANGE_PASSWORD) {
-            ChangePasswordScreen(navController = navController, onChangePassword = { current, new ->
-                val success = onChangePassword(current, new)
-                if (success) navController.navigateUp()
-                success
-            })
-        }
-        composable(AccountDestinations.PUSH_NOTIFICATIONS) {
-            PushNotificationsScreen(navController = navController, initialState = pushNotificationsEnabled, onToggle = onNotificationToggle)
-        }
-        composable(AccountDestinations.FAQ) {
-            FaqScreen(navController = navController, faqs = faqs)
-        }
-        composable(AccountDestinations.CONTACT_SUPPORT) {
-            ContactSupportScreen(navController = navController, email = contactEmail, phone = contactPhone)
-        }
-        composable(AccountDestinations.REPORT_BUG) {
-            ReportBugScreen(navController = navController, onSubmit = { report ->
-                val success = onBugSubmit(report)
-                if (success) navController.navigateUp()
-                success
-            })
-        }
-        composable(AccountDestinations.LOGOUT_DELETE) {
-            LogoutDeleteScreen(navController = navController, onLogout = onLogout, onDeleteAccount = onDeleteAccount)
-        }
-    }
-}
 
 // --- Account Main Screen (Revamped UI) ---
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,7 +61,7 @@ fun AccountScreenNavHost(
 fun AccountMainScreen(navController: NavController) {
     Scaffold(
         topBar = { ModernTopAppBar(title = "Account Settings") }, // Use new AppBar
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -212,19 +75,19 @@ fun AccountMainScreen(navController: NavController) {
                 SettingsItem(
                     icon = Icons.Filled.PersonOutline, // Changed Icon
                     title = "Profile Information",
-                    onClick = { navController.navigate(AccountDestinations.PROFILE_INFO) }
+                    onClick = { navController.navigate(Screen.Profile_info.route) }
                 )
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.Filled.LockOpen, // Changed Icon
                     title = "Change Password",
-                    onClick = { navController.navigate(AccountDestinations.CHANGE_PASSWORD) }
+                    onClick = { navController.navigate(Screen.Change_password.route) }
                 )
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.Filled.NotificationsNone, // Changed Icon
                     title = "Push Notifications",
-                    onClick = { navController.navigate(AccountDestinations.PUSH_NOTIFICATIONS) }
+                    onClick = { navController.navigate(Screen.Push_notifications.route) }
                 )
             }
 
@@ -234,19 +97,19 @@ fun AccountMainScreen(navController: NavController) {
                 SettingsItem(
                     icon = Icons.AutoMirrored.Filled.HelpOutline,
                     title = "FAQ / Help Center",
-                    onClick = { navController.navigate(AccountDestinations.FAQ) }
+                    onClick = { navController.navigate(Screen.Faq.route) }
                 )
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.AutoMirrored.Filled.HelpOutline, // Changed Icon
                     title = "Contact Support",
-                    onClick = { navController.navigate(AccountDestinations.CONTACT_SUPPORT) }
+                    onClick = { navController.navigate(Screen.Contact_support.route) }
                 )
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.AutoMirrored.Filled.Notes, // Changed Icon (BugReport is not standard filled)
                     title = "Report a Bug",
-                    onClick = { navController.navigate(AccountDestinations.REPORT_BUG) }
+                    onClick = { navController.navigate(Screen.Report_bug.route) }
                 )
             }
 
@@ -256,7 +119,7 @@ fun AccountMainScreen(navController: NavController) {
                 SettingsItem(
                     icon = Icons.AutoMirrored.Filled.Logout,
                     title = "Logout / Delete Account",
-                    onClick = { navController.navigate(AccountDestinations.LOGOUT_DELETE) },
+                    onClick = { navController.navigate(Screen.Logout_delete.route) },
                     // Optional: Change icon color for emphasis, but orange is primary
                     // iconTint = MaterialTheme.colorScheme.error
                 )
@@ -272,9 +135,9 @@ fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium, // Use medium rounded corners
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // Remove shadow for flatter look
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline) // Use subtle border
+        border = BorderStroke(1.dp, Color(0xFFEAEAEA)) // Use subtle border
     ) {
         Column {
             content()
@@ -288,7 +151,7 @@ fun SettingsItem(
     title: String,
     subtitle: String? = null,
     onClick: () -> Unit,
-    iconTint: Color = MaterialTheme.colorScheme.primary // Orange icon tint
+    iconTint: Color =  AppColors.primary
 ) {
     Row(
         modifier = Modifier
@@ -309,14 +172,14 @@ fun SettingsItem(
                 text = title,
                 fontSize = 16.sp, // Slightly adjusted size
                 fontWeight = FontWeight.Normal, // Normal weight for cleaner look
-                color = MaterialTheme.colorScheme.onSurface // Primary text color
+                color = Color(0xFF1D1D1F)// Primary text color
             )
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = subtitle,
                     fontSize = 13.sp, // Smaller subtitle
-                    color = MaterialTheme.colorScheme.onSurfaceVariant // Secondary text color
+                    color = Color(0xFFF5F5F7) // Secondary text color
                 )
             }
         }
@@ -324,7 +187,7 @@ fun SettingsItem(
         Icon(
             imageVector = Icons.Default.ArrowForwardIos, // Chevron icon
             contentDescription = null, // Decorative
-            tint = MaterialTheme.colorScheme.outlineVariant, // Subtle gray color for chevron
+            tint = Color(0xFFD1D1D6), // Subtle gray color for chevron
             modifier = Modifier.size(16.dp) // Smaller chevron
         )
     }
@@ -333,7 +196,7 @@ fun SettingsItem(
 @Composable
 fun SettingsDivider() {
     HorizontalDivider(
-        color = MaterialTheme.colorScheme.outline, // Use defined outline color
+        color = Color(0xFFEAEAEA), // Use defined outline color
         thickness = 0.5.dp, // Make it very thin
         modifier = Modifier.padding(start = 56.dp) // Indent divider (icon size + spacer)
     )
@@ -344,7 +207,7 @@ fun SectionHeader(title: String) {
     Text(
         text = title.uppercase(), // Uppercase for distinction
         style = MaterialTheme.typography.labelMedium, // Use a label style
-        color = MaterialTheme.colorScheme.secondary, // Use BLUE accent for headers
+        color = AppColors.darkBlue, // Use BLUE accent for headers
         modifier = Modifier.padding(start = 16.dp, bottom = 8.dp, top = 16.dp) // Adjust padding
     )
 }
@@ -364,7 +227,7 @@ fun ProfileInfoScreen(
 
     Scaffold(
         topBar = { ModernSubPageAppBar(title = "Profile Information", navController = navController) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -417,7 +280,7 @@ fun ChangePasswordScreen(
 
     Scaffold(
         topBar = { ModernSubPageAppBar(title = "Change Password", navController = navController) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -448,7 +311,7 @@ fun ChangePasswordScreen(
             AnimatedVisibility(visible = showError != null) {
                 Text(
                     text = showError ?: "",
-                    color = MaterialTheme.colorScheme.error,
+                    color = Color(0xFFFF3B30),
                     fontSize = 13.sp,
                     modifier = Modifier.padding(top = 8.dp, start = 4.dp)
                 )
@@ -492,19 +355,19 @@ fun ModernTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small, // Consistent rounding
         leadingIcon = leadingIcon?.let {
-            { Icon(it, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+            { Icon(it, contentDescription = null, tint = Color(0xFFF5F5F7)) }
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-            focusedBorderColor = MaterialTheme.colorScheme.primary, // Orange focus
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline, // Light gray border
-            cursorColor = MaterialTheme.colorScheme.primary,
-            focusedLabelColor = MaterialTheme.colorScheme.primary, // Orange label focus
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, // Gray label
-            errorBorderColor = MaterialTheme.colorScheme.error,
-            errorLabelColor = MaterialTheme.colorScheme.error,
-            errorLeadingIconColor = MaterialTheme.colorScheme.error
+            focusedTextColor = Color(0xFF1D1D1F),
+            unfocusedTextColor = Color(0xFF1D1D1F),
+            focusedBorderColor = AppColors.primary, // Orange focus
+            unfocusedBorderColor = Color(0xFFEAEAEA), // Light gray border
+            cursorColor = AppColors.primary,
+            focusedLabelColor = AppColors.primary, // Orange label focus
+            unfocusedLabelColor = Color(0xFFF5F5F7), // Gray label
+            errorBorderColor = Color(0xFFFF3B30),
+            errorLabelColor = Color(0xFFFF3B30),
+            errorLeadingIconColor = Color(0xFFFF3B30)
         ),
         singleLine = true,
         isError = isError
@@ -528,27 +391,27 @@ fun ModernPasswordTextField(
         singleLine = true,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         leadingIcon = { // Lock icon
-            Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Outlined.Lock, contentDescription = null, tint = Color(0xFFF5F5F7))
         },
         trailingIcon = {
             val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
             val description = if (passwordVisible) "Hide password" else "Show password"
             IconButton(onClick = {passwordVisible = !passwordVisible}){
-                Icon(imageVector  = image, description, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(imageVector  = image, description, tint = Color(0xFFF5F5F7))
             }
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-            focusedBorderColor = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
-            cursorColor = MaterialTheme.colorScheme.primary,
-            focusedLabelColor = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            errorBorderColor = MaterialTheme.colorScheme.error,
-            errorLabelColor = MaterialTheme.colorScheme.error,
-            errorLeadingIconColor = MaterialTheme.colorScheme.error,
-            errorTrailingIconColor = MaterialTheme.colorScheme.error
+            focusedTextColor = Color(0xFF1D1D1F),
+            unfocusedTextColor = Color(0xFF1D1D1F),
+            focusedBorderColor = if(isError) Color(0xFFFF3B30) else AppColors.primary,
+            unfocusedBorderColor = if(isError) Color(0xFFFF3B30) else Color(0xFFEAEAEA),
+            cursorColor = AppColors.primary,
+            focusedLabelColor = if(isError) Color(0xFFFF3B30) else AppColors.primary,
+            unfocusedLabelColor = Color(0xFFF5F5F7),
+            errorBorderColor = Color(0xFFFF3B30),
+            errorLabelColor = Color(0xFFFF3B30),
+            errorLeadingIconColor = Color(0xFFFF3B30),
+            errorTrailingIconColor = Color(0xFFFF3B30)
         ),
         isError = isError
     )
@@ -566,7 +429,7 @@ fun PushNotificationsScreen(
 
     Scaffold(
         topBar = { ModernSubPageAppBar(title = "Push Notifications", navController = navController) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -577,7 +440,7 @@ fun PushNotificationsScreen(
             Card( // Use Card for better visual grouping
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), // Use light gray variant bg
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F7)), // Use light gray variant bg
                 elevation = CardDefaults.cardElevation(0.dp) // No shadow needed if bg is different
             ) {
                 Row(
@@ -596,7 +459,7 @@ fun PushNotificationsScreen(
                         Text(
                             "Receive updates, alerts, and important information.",
                             style = MaterialTheme.typography.bodyMedium, // Use body style
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = Color(0xFFF5F5F7),
                             lineHeight = 18.sp
                         )
                     }
@@ -608,10 +471,10 @@ fun PushNotificationsScreen(
                             onToggle(checked)
                         },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary, // Orange thumb
-                            checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                            uncheckedThumbColor = MaterialTheme.colorScheme.outline, // Use outline color for thumb
-                            uncheckedTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                            checkedThumbColor = AppColors.primary, // Orange thumb
+                            checkedTrackColor = AppColors.primary.copy(alpha = 0.5f),
+                            uncheckedThumbColor = Color(0xFFEAEAEA), // Use outline color for thumb
+                            uncheckedTrackColor = Color(0xFFEAEAEA).copy(alpha = 0.3f),
                         )
                     )
                 }
@@ -630,7 +493,7 @@ fun FaqScreen(
 ) {
     Scaffold(
         topBar = { ModernSubPageAppBar(title = "FAQ / Help Center", navController = navController) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -642,7 +505,7 @@ fun FaqScreen(
                 Text(
                     "Frequently Asked Questions",
                     style = MaterialTheme.typography.titleLarge, // Bigger Title
-                    color = MaterialTheme.colorScheme.secondary, // BLUE title
+                    color = AppColors.darkBlue, // BLUE title
                     modifier = Modifier.padding(bottom = 16.dp, start = 4.dp)
                 )
             }
@@ -664,7 +527,7 @@ fun FaqListItemModern(faq: FaqItem) {
         modifier = Modifier.fillMaxWidth().animateContentSize(), // Animate size change
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant // Use surface variant bg
+            containerColor = Color(0xFFF5F5F7) // Use surface variant bg
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // No shadow
     ) {
@@ -681,14 +544,14 @@ fun FaqListItemModern(faq: FaqItem) {
                     text = faq.question,
                     fontWeight = FontWeight.Medium, // Medium weight question
                     fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color(0xFF1D1D1F),
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
                     imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = if (expanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.primary // Orange chevron
+                    tint = AppColors.primary // Orange chevron
                 )
             }
 
@@ -697,7 +560,7 @@ fun FaqListItemModern(faq: FaqItem) {
                 Text(
                     text = faq.answer,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = Color(0xFFF5F5F7),
                     lineHeight = 20.sp,
                     modifier = Modifier.padding(top = 10.dp) // Add padding only when visible
                 )
@@ -717,7 +580,7 @@ fun ContactSupportScreen(
 ) {
     Scaffold(
         topBar = { ModernSubPageAppBar(title = "Contact Support", navController = navController) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -731,21 +594,21 @@ fun ContactSupportScreen(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary, // BLUE Icon
+                tint = AppColors.darkBlue, // BLUE Icon
                 modifier = Modifier.size(56.dp) // Slightly smaller
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 "Need Assistance?",
                 style = MaterialTheme.typography.headlineSmall, // Adjusted style
-                color = MaterialTheme.colorScheme.onSurface,
+                color = Color(0xFF1D1D1F),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "Our support team is ready to help. Reach out using the options below.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = Color(0xFFF5F5F7),
                 textAlign = TextAlign.Center,
                 lineHeight = 22.sp
             )
@@ -773,7 +636,7 @@ fun ModernContactOption(icon: ImageVector, label: String, value: String, onClick
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F7)),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Row(
@@ -783,14 +646,14 @@ fun ModernContactOption(icon: ImageVector, label: String, value: String, onClick
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary, // Orange icons for contrast on gray bg
+                tint = AppColors.primary, // Orange icons for contrast on gray bg
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(label, style = MaterialTheme.typography.titleMedium) // Bolder label
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(value, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFF5F5F7))
             }
         }
     }
@@ -809,7 +672,7 @@ fun ReportBugScreen(
 
     Scaffold(
         topBar = { ModernSubPageAppBar(title = "Report a Bug", navController = navController) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -836,15 +699,15 @@ fun ReportBugScreen(
                 placeholder = { Text("Please include steps to reproduce the problem if possible...") },
                 shape = MaterialTheme.shapes.medium, // More rounding
                 colors = OutlinedTextFieldDefaults.colors( // Consistent styling
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface, // Ensure bg is white when focused
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    focusedTextColor = Color(0xFF1D1D1F),
+                    unfocusedTextColor = Color(0xFF1D1D1F),
+                    focusedBorderColor = AppColors.primary,
+                    unfocusedBorderColor = Color(0xFFEAEAEA),
+                    cursorColor = AppColors.primary,
+                    focusedContainerColor = Color.White, // Ensure bg is white when focused
+                    unfocusedContainerColor = Color.White,
+                    focusedPlaceholderColor = Color(0xFFF5F5F7).copy(alpha = 0.7f),
+                    unfocusedPlaceholderColor = Color(0xFFF5F5F7).copy(alpha = 0.7f)
                 )
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -879,7 +742,7 @@ fun ReportBugScreen(
 fun FeedbackText(text: String, isError: Boolean) {
     Text(
         text = text,
-        color = if (isError) MaterialTheme.colorScheme.error else SuccessColor,
+        color = if (isError) Color(0xFFFF3B30) else Color(0xFF34C759),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(vertical = 8.dp)
     )
@@ -898,7 +761,7 @@ fun LogoutDeleteScreen(
 
     Scaffold(
         topBar = { ModernSubPageAppBar(title = "Manage Account", navController = navController) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFFDFEFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -913,7 +776,7 @@ fun LogoutDeleteScreen(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
+            HorizontalDivider(color = Color(0xFFEAEAEA), thickness = 1.dp)
             Spacer(modifier = Modifier.height(32.dp))
 
             // Delete Account Section
@@ -921,14 +784,14 @@ fun LogoutDeleteScreen(
                 Icon(
                     Icons.Filled.WarningAmber,
                     contentDescription = "Warning",
-                    tint = MaterialTheme.colorScheme.error,
+                    tint = Color(0xFFFF3B30),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     "Delete Account",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.error,
+                    color = Color(0xFFFF3B30),
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -936,7 +799,7 @@ fun LogoutDeleteScreen(
             Text(
                 "Permanently delete your account and all associated data. This action cannot be undone.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = Color(0xFFF5F5F7),
                 lineHeight = 20.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -955,10 +818,10 @@ fun LogoutDeleteScreen(
         AlertDialog(
             onDismissRequest = { showDeleteConfirmDialog = false },
             shape = MaterialTheme.shapes.large, // More rounded dialog
-            containerColor = MaterialTheme.colorScheme.surface,
-            icon = { Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            containerColor = Color.White,
+            icon = { Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = Color(0xFFFF3B30)) },
             title = { Text("Confirm Deletion", fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to permanently delete your account?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            text = { Text("Are you sure you want to permanently delete your account?", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFF5F5F7)) },
             confirmButton = {
                 Button( // Destructive confirm button
                     onClick = {
@@ -966,8 +829,8 @@ fun LogoutDeleteScreen(
                         onDeleteAccount()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                        containerColor = Color(0xFFFF3B30),
+                        contentColor = Color.White
                     ),
                     shape = MaterialTheme.shapes.small
                 ) { Text("Delete") }
@@ -975,7 +838,7 @@ fun LogoutDeleteScreen(
             dismissButton = {
                 TextButton( // Standard dismiss button
                     onClick = { showDeleteConfirmDialog = false },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary) // Orange text
+                    colors = ButtonDefaults.textButtonColors(contentColor = AppColors.primary) // Orange text
                 ) { Text("Cancel") }
             }
         )
@@ -993,14 +856,14 @@ fun ModernButton(
     isDestructive: Boolean = false // Flag for error color scheme
 ) {
     val containerColor = when {
-        !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f) // Standard disabled color
-        isDestructive -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.primary // Orange default
+        !enabled -> Color(0xFF1D1D1F).copy(alpha = 0.12f) // Standard disabled color
+        isDestructive -> Color(0xFFFF3B30)
+        else -> AppColors.primary // Orange default
     }
     val contentColor = when {
-        !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        isDestructive -> MaterialTheme.colorScheme.onError
-        else -> MaterialTheme.colorScheme.onPrimary // White on orange
+        !enabled -> Color(0xFF1D1D1F).copy(alpha = 0.38f)
+        isDestructive -> Color.White
+        else -> Color.White // White on orange
     }
 
     Button(
@@ -1011,8 +874,8 @@ fun ModernButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), // Adjusted disabled bg
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            disabledContainerColor = Color(0xFF1D1D1F).copy(alpha = 0.08f), // Adjusted disabled bg
+            disabledContentColor = Color(0xFF1D1D1F).copy(alpha = 0.38f)
         ),
         elevation = ButtonDefaults.buttonElevation( // No shadow for flat look
             defaultElevation = 0.dp,
@@ -1039,11 +902,11 @@ fun ModernTopAppBar(title: String) {
         CenterAlignedTopAppBar( // Use CenterAligned for main screen title
             title = { Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp) }, // Bold Title
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface, // White background
-                titleContentColor = MaterialTheme.colorScheme.onSurface // Dark Text
+                containerColor = Color.White, // White background
+                titleContentColor = Color(0xFF1D1D1F)// Dark Text
             )
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp) // Thin divider below app bar
+        HorizontalDivider(color = Color(0xFFEAEAEA), thickness = 1.dp) // Thin divider below app bar
     }
 }
 
@@ -1058,17 +921,17 @@ fun ModernSubPageAppBar(title: String, navController: NavController) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.primary // Orange back arrow
+                        tint = AppColors.primary // Orange back arrow
                     )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                titleContentColor = MaterialTheme.colorScheme.onSurface,
-                navigationIconContentColor = MaterialTheme.colorScheme.primary
+                containerColor = Color.White,
+                titleContentColor = Color(0xFF1D1D1F),
+                navigationIconContentColor = AppColors.primary
             )
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
+        HorizontalDivider(color = Color(0xFFEAEAEA), thickness = 1.dp)
     }
 }
 
@@ -1086,7 +949,7 @@ fun getSampleFaqs(): List<FaqItem> {
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun PreviewAccountMainScreenLight() {
-    MyModernAppTheme {
+    ClientAidantTheme {
         AccountMainScreen(navController = rememberNavController())
     }
 }
@@ -1095,7 +958,7 @@ fun PreviewAccountMainScreenLight() {
 @Composable
 fun PreviewProfileInfoScreenLight() {
     val profile = UserProfile("Test User", "test@example.com", "123-456")
-    MyModernAppTheme {
+    ClientAidantTheme {
         ProfileInfoScreen(navController = rememberNavController(), profile = profile, onSave = {})
     }
 }
@@ -1103,7 +966,7 @@ fun PreviewProfileInfoScreenLight() {
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun PreviewChangePasswordScreenLight() {
-    MyModernAppTheme {
+    ClientAidantTheme {
         ChangePasswordScreen(navController = rememberNavController(), onChangePassword = {_,_ -> true })
     }
 }
@@ -1111,7 +974,7 @@ fun PreviewChangePasswordScreenLight() {
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun PreviewPushNotificationsScreenLight() {
-    MyModernAppTheme {
+    ClientAidantTheme {
         PushNotificationsScreen(navController = rememberNavController(), initialState = true, onToggle = {})
     }
 }
@@ -1121,7 +984,7 @@ fun PreviewPushNotificationsScreenLight() {
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun PreviewLogoutDeleteScreenLight() {
-    MyModernAppTheme {
+    ClientAidantTheme {
         LogoutDeleteScreen(navController = rememberNavController(), onLogout = { }, onDeleteAccount = { })
     }
 }

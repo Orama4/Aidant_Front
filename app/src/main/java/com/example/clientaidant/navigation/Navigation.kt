@@ -1,5 +1,8 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,9 +14,18 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Tracking : Screen("tracking")
     object Notifications : Screen("notifications")
-    object Account : Screen("account")
     object Registration : Screen("registration")
     object Login : Screen("login")
+    object Main_account : Screen("main_account")
+    object Profile_info : Screen("profile_info")
+    object Change_password : Screen("change_password")
+    object Push_notifications : Screen("push_notifications")
+    object Faq : Screen("faq")
+    object Contact_support : Screen("contact_support")
+    object Report_bug : Screen("report_bug")
+    object Logout_delete : Screen("logout_delete")
+
+
 }
 
 @Composable
@@ -21,8 +33,6 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
     NavHost(
         navController = navController,
         startDestination = Screen.Tracking.route,
-
-
     ) {
         composable(Screen.Home.route) {   HomeScreen(
             userName = "John",
@@ -63,9 +73,64 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
                 NotificationData("n5", "Jane Smith", "liked your post", "1 hour ago"),
             )
             DefaultNotificationsPreview(sampleMessages,sampleNotifications) }
-        composable(Screen.Account.route) { /* Account Screen Content */ }
         composable(Screen.Registration.route) { /* Registration Screen Content */ }
         composable(Screen.Login.route) { /* Login Screen Content */ }
+
+        composable(Screen.Main_account.route) {
+            AccountMainScreen(navController = navController)
+        }
+        composable(Screen.Profile_info.route) {
+            val userProfile = remember {
+                mutableStateOf(UserProfile("Aymen Bouslama", "aymen.b@example.com", "+1 123-456-7890"))
+            }
+            ProfileInfoScreen(navController = navController, profile = userProfile.value,
+                onSave = { updatedProfile ->
+            println("Saving profile: $updatedProfile")
+            userProfile.value = updatedProfile
+            navController.navigateUp()
+        }
+            )}
+        composable(Screen.Change_password.route) {
+            ChangePasswordScreen(navController = navController, onChangePassword = { current, new ->
+                println("Changing password: Current=$current, New=$new")
+            val success = true
+            if (success) navController.navigateUp()
+            success
+        }) }
+        composable(Screen.Push_notifications.route) {
+            val pushNotificationsEnabled = rememberSaveable { mutableStateOf(true) }
+
+            PushNotificationsScreen(navController = navController, initialState = pushNotificationsEnabled.value, onToggle = { enabled ->
+                println("Notifications toggled: $enabled")
+                pushNotificationsEnabled.value = enabled })
+
+        }
+        composable(Screen.Faq.route) {
+            val faqs = remember { getSampleFaqs() }
+            FaqScreen(navController = navController, faqs = faqs)
+        }
+        composable(Screen.Contact_support.route) {
+            val contactEmail = "support@yourapp.com"
+            val contactPhone = "+1-800-SUPPORT"
+            ContactSupportScreen(navController = navController, email = contactEmail, phone = contactPhone)
+
+        }
+        composable(Screen.Report_bug.route) {
+            ReportBugScreen(navController = navController, onSubmit = { report ->
+                println("Submitting bug report: $report")
+                 // Simulate success
+                val success = true
+                if (success) navController.navigateUp()
+                success
+            })
+        }
+        composable(Screen.Logout_delete.route) {
+            LogoutDeleteScreen(navController = navController, onLogout = {
+                println("Logging out...")
+            }, onDeleteAccount = {println("Deleting account...")})
+
+        }
+
     }
 }
 

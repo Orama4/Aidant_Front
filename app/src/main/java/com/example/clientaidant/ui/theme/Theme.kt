@@ -3,13 +3,17 @@ package com.example.clientaidant.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -36,7 +40,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun ClientAidantTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -52,7 +55,17 @@ fun ClientAidantTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = MaterialTheme.typography.copy( // Example: Customize typography slightly
+            bodyLarge = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF1D1D1F)),
+            titleMedium = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = Color(0xFF1D1D1F)),
+            // Add other typography customizations here
+        ),
+        shapes = MaterialTheme.shapes.copy( // Slightly more rounded shapes
+            extraSmall = RoundedCornerShape(8.dp),
+            small = RoundedCornerShape(12.dp), // Used for buttons, text fields
+            medium = RoundedCornerShape(16.dp), // Used for cards
+            large = RoundedCornerShape(20.dp)
+        ),
         content = content
     )
 }
