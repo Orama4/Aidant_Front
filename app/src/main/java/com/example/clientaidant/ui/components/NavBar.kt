@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.example.clientaidant.R
+import kotlinx.coroutines.delay
 
 class BottomBarShape(
     private val cutoutRadius: Dp,

@@ -1,4 +1,6 @@
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -8,6 +10,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -101,7 +104,9 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .padding(bottom = 20.dp)
+                .weight(1f)
+            ,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -300,16 +305,18 @@ fun UserCard(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.LocationOn,
+                        imageVector = Icons.Outlined.LocationOn,
                         contentDescription = "Location",
                         tint = IconColor,
                         modifier = Modifier.size(16.dp)
+
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = user.location,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
+                        color = IconColor
+
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("|", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
@@ -331,16 +338,23 @@ fun UserCard(
         ) {
             OutlinedButton(
                 onClick = { onTrackLocationClick(user.id) },
-                modifier = Modifier.weight(1f).height(40.dp),
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = OrangeAccent)
+                modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = OrangeAccent, // Couleur du texte et de l'icône
+                    containerColor = Color.Transparent // Pour un fond transparent
+                ),
+                border = BorderStroke(1.dp, OrangeAccent) // Bordeure orange
             ) {
                 Text("Track location", fontSize = 12.sp)
             }
+
             Button(
                 onClick = { onRemoteAssistanceClick(user.id) },
                 modifier = Modifier.weight(1f).height(40.dp),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = OrangeAccent)
             ) {
                 Text("Remote assistance", fontSize = 12.sp, color = Color.White)

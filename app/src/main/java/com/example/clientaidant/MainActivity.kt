@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavigationController(navController)
                     AnimatedBottomNavigationBar(navController)
+
 //                    DefaultNotificationsPreview()
                 }
 

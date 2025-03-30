@@ -33,7 +33,7 @@ fun TrackUser() {
     var isLifted by remember { mutableStateOf(false) }
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val cardHeight by animateDpAsState(
-        targetValue = if (isLifted) screenHeight * 0.7f else screenHeight * 0.2f,
+        targetValue = if (isLifted) screenHeight * 0.85f else screenHeight * 0.25f,
         animationSpec = tween(durationMillis = 300), label = ""
     )
 

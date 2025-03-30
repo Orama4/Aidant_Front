@@ -2,6 +2,7 @@
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -10,27 +11,31 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack // Use autoMirrored for RTL support
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// --- Data Classes ---
+import com.example.clientaidant.R
+import com.example.clientaidant.ui.theme.AppColors
+import com.example.clientaidant.ui.theme.PlusJakartaSans
 
 data class MessageData(
     val id: String,
     val senderName: String,
     val preview: String,
     val timestamp: String,
-    val unreadCount: Int?, // Nullable for messages without unread count
+    val unreadCount: Int?,
     val isOnline: Boolean
 )
 
@@ -41,26 +46,6 @@ data class NotificationData(
     val timestamp: String
 )
 
-// --- Main Activity (Example Usage) ---
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-
-                // Sample Data (replace with your actual data source)
-                val sampleMessages = remember { getSampleMessages() }
-                val sampleNotifications = remember { getSampleNotifications() }
-
-                MessagesNotificationsScreen(
-                    messages = sampleMessages,
-                    notifications = sampleNotifications,
-                    onBackClick = { /* Handle back navigation */ }
-                )
-
-        }
-    }
-}
 
 // --- Composable Screen ---
 
@@ -139,7 +124,7 @@ fun MessagesNotificationsScreen(
 @Composable
 fun MessageList(messages: List<MessageData>) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(Color.White),
         contentPadding = PaddingValues(vertical = 8.dp) // Add some padding around the list
     ) {
         items(messages, key = { it.id }) { message ->
@@ -217,7 +202,7 @@ fun UnreadBadge(count: Int) {
 @Composable
 fun NotificationList(notifications: List<NotificationData>) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(Color.White),
         contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         items(notifications, key = { it.id }) { notification ->
@@ -294,90 +279,90 @@ fun UserAvatar(isOnline: Boolean) {
         }
     }
 }
-
-
-// --- Sample Data Functions ---
-
-fun getSampleMessages(): List<MessageData> {
-    return listOf(
-        MessageData("m1", "Royal Parvej", "Sounds awesome!", "19:37", 1, true),
-        MessageData("m2", "Cameron Williamson", "Ok, Just hurry up little bit...😊", "19:37", 2, true),
-        MessageData("m3", "Ralph Edwards", "Thanks dude.", "19:37", null, true), // No unread count
-        MessageData("m4", "Cody Fisher", "How is going...?", "19:37", null, true),
-        MessageData("m5", "Eleanor Pena", "Thanks for the awesome food man...!", "19:37", null, false), // Offline
-        MessageData("m6", "Esther Howard", "See you tomorrow!", "19:35", 5, true) // More unread
-    )
-}
-
-fun getSampleNotifications(): List<NotificationData> {
-    return listOf(
-        NotificationData("n1", "John Doe", "requested assistance", "20 min ago"),
-        NotificationData("n2", "John Doe", "requested assistance", "20 min ago"),
-        NotificationData("n3", "John Doe", "requested assistance", "20 min ago"),
-        NotificationData("n4", "John Doe", "requested assistance", "20 min ago"),
-        NotificationData("n5", "Jane Smith", "liked your post", "1 hour ago"),
-    )
-}
-
-
-// --- Preview ---
-
-@Preview(showBackground = true, device = "id:pixel_6") // Example device
 @Composable
-fun DefaultMessagesPreview() {
-
-        MessagesNotificationsScreen(
-            messages = getSampleMessages(),
-            notifications = getSampleNotifications(),
-            onBackClick = {}
+fun Appbar(title:String){
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(16.dp,) .background(Color.White) ,
+        horizontalArrangement = Arrangement.Start // Align to the left
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.d_back),
+            contentDescription = null,
         )
-
+        Text(
+            text = "$title",
+            modifier = Modifier.padding(8.dp),
+            color = AppColors.darkBlue,
+            fontSize = 20.sp,
+            textAlign = TextAlign.Start,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = PlusJakartaSans,
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, device = "id:pixel_6")
 @Composable
-fun DefaultNotificationsPreview() {
-    // To preview notifications selected, we need to manage state within the preview
-    // or create a dedicated preview function. Let's manage state here.
-    var selectedTabIndex by remember { mutableStateOf(0) } // Start with Notifications selected
+fun DefaultNotificationsPreview(sampleMessages: List<MessageData>,
+                                sampleNotifications: List<NotificationData>) {
 
+         var selectedTabIndex by remember { mutableStateOf(0) } // Start with Notifications selected
+    val unreadMessageCount = sampleMessages.count { it.unreadCount != null && it.unreadCount > 0 }
+    val messageTabTitle = if (unreadMessageCount > 0) "Messages ($unreadMessageCount)" else "Messages"
 
-        val sampleMessages = remember { getSampleMessages() }
-        val sampleNotifications = remember { getSampleNotifications() }
-        val unreadMessageCount = sampleMessages.count { it.unreadCount != null && it.unreadCount > 0 }
-        val messageTabTitle = if (unreadMessageCount > 0) "Messages ($unreadMessageCount)" else "Messages"
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(if (selectedTabIndex == 0) "Notifications" else "Messages") },
-                    navigationIcon = {
-                        IconButton(onClick = {}) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+            Column(Modifier.padding(WindowInsets.statusBars.asPaddingValues()).background(Color.White)) {
+                when (selectedTabIndex) {
+                    0 -> Appbar("Notifications" )
+                    1 -> Appbar("Messages" )
+                }
+                TabRow(  selectedTabIndex = selectedTabIndex,
+                    contentColor = Color(0xFFCCCCCC),
+                    indicator = { tabPositions ->
+                        if (tabPositions.isNotEmpty() && selectedTabIndex < tabPositions.size) {
+                            TabRowDefaults.Indicator(
+                                Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                height = 4.dp,
+                                color = Color(0xFFFA8609)
+                            )
                         }
-                    }
-                )
-            }
-        ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
-                TabRow(selectedTabIndex = selectedTabIndex) {
+                    },
+
+                ) {
                     Tab(
+                        modifier = Modifier.background(Color.White),
                         selected = selectedTabIndex == 0,
                         onClick = { selectedTabIndex = 0 },
-                        text = { Text("Notifications") }
-                    )
+                        text = {
+                            Text(
+                                "Notifications",
+                                color = if (selectedTabIndex == 0) Color(0xFFFA8609) else Color(0xFFCCCCCC),
+                                fontWeight = if (selectedTabIndex == 0) FontWeight.SemiBold else FontWeight.Normal // Maybe SemiBold looks better?
+                            )
+                        },
+                        selectedContentColor = Color(0xFFFA8609),
+                        unselectedContentColor = Color(0xFFCCCCCC)
+                        )
                     Tab(
+                        modifier = Modifier.background(Color.White),
                         selected = selectedTabIndex == 1,
                         onClick = { selectedTabIndex = 1 },
-                        text = { Text(messageTabTitle) }
+                                text = {
+                            Text(
+                                messageTabTitle,
+                                color = if (selectedTabIndex == 1) Color(0xFFFA8609) else Color(0xFFCCCCCC),
+                                fontWeight = if (selectedTabIndex == 1) FontWeight.SemiBold else FontWeight.Normal // Maybe SemiBold looks better?
+                            )
+                        },
+                        selectedContentColor = Color(0xFFFA8609),
+                        unselectedContentColor = Color(0xFFCCCCCC)
+
                     )
                 }
+
                 when (selectedTabIndex) {
                     0 -> NotificationList(notifications = sampleNotifications)
                     1 -> MessageList(messages = sampleMessages)
                 }
             }
-        }
+
 
 }
