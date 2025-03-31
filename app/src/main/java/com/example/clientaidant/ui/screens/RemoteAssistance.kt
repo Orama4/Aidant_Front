@@ -1,14 +1,11 @@
 package com.example.clientaidant.ui.screens
 
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,9 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -34,17 +29,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clientaidant.R
-import com.example.clientaidant.ui.components.component1
 import com.example.clientaidant.ui.theme.AppColors
 import com.example.clientaidant.ui.theme.PlusJakartaSans
+import androidx.compose.ui.platform.LocalContext
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemoteAssistance() {
     var text by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
 
     // Top Section (Back button + Title)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 24.dp)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -123,60 +133,60 @@ fun RemoteAssistance() {
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Column to handle the line and spacing dynamically
-                Column(
-                    modifier = Modifier.padding(start = 16.dp), // Adjust padding for positioning
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // First Image
-                    Image(
-                        painter = painterResource(id = R.drawable.departure),
-                        contentDescription = null,
-                        modifier = Modifier.size(30.dp)
-                    )
+                Image(
+                    painter = painterResource(id = R.drawable.track2),
+                    contentDescription = null,
+                    modifier = Modifier.size(90.dp),
+                )
 
-                    // Vertical Line
-                    Box(
-                        modifier = Modifier
-                            .width(2.dp)
-                            .height(40.dp) // Adjust height dynamically
-                            .background(AppColors.greyBlue)
-                    )
+                Column {
+                    Column {
+                        Text(
+                            text = "Departure",
+                            color = AppColors.greyBlue,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = PlusJakartaSans,
+                        )
 
-                    // Second Image
-                    Image(
-                        painter = painterResource(id = R.drawable.location),
-                        contentDescription = null,
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
+                        Text(
+                            text = "Main hall",
+                            color = AppColors.darkBlue,
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = PlusJakartaSans,
+                        )
+                    }
 
-                Spacer(modifier = Modifier.width(16.dp)) // Space between line & text
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                // Column for Text Content
-                Column(
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = "Departure\nMain Hall",
-                        color = AppColors.darkBlue,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Normal,
-                        fontFamily = PlusJakartaSans
-                    )
-                    Spacer(modifier = Modifier.height(10.dp)) // Space between texts
-                    Text(
-                        text = "Arrival\nMoving towards the Exit",
-                        color = AppColors.greyBlue,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Normal,
-                        fontFamily = PlusJakartaSans
-                    )
+                    Column {
+                        Text(
+                            text = "Arrival",
+                            color = AppColors.greyBlue,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = PlusJakartaSans,
+                        )
+                        Text(
+                            text = "Exit",
+                            color = AppColors.darkBlue,
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = PlusJakartaSans,
+                        )
+                    }
                 }
             }
+
+
+            Spacer(modifier = Modifier.height(20.dp))
 
 
 
@@ -186,7 +196,19 @@ fun RemoteAssistance() {
                 horizontalArrangement = Arrangement.Center
             ) {
                 Button(
-                    onClick = { /* Your action here */ },
+                    onClick = {
+                        val phoneNumber = "tel:+213623456789" // recuperer le num a partir de la bdd
+
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
+                            == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            val intent = Intent(Intent.ACTION_CALL, Uri.parse(phoneNumber))
+                            context.startActivity(intent)
+                        } else {
+                            // Permission is NOT granted, request it (handled outside Compose)
+                            // You need to request CALL_PHONE permission in your activity
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -430,4 +452,5 @@ fun RemoteAssistance() {
 
 
         }
+    }
 }

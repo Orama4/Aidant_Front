@@ -9,14 +9,24 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.clientaidant.ui.screens.ForgetPasswordScreen
+import com.example.clientaidant.ui.screens.LoginScreen
+import com.example.clientaidant.ui.screens.OnboardingScreen
+import com.example.clientaidant.ui.screens.RegistrationScreen
 import com.example.clientaidant.ui.screens.TrackUser
+import com.example.clientaidant.ui.screens.VerificationScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Tracking : Screen("tracking")
     object Notifications : Screen("notifications")
-    object Registration : Screen("registration")
+
     object Login : Screen("login")
+    object Registration : Screen("registration")
+    object ForgotPassword : Screen("ForgotPassword")
+    object Verification : Screen("verification")
+    object OnBoarding : Screen("onboarding")
+
     object Main_account : Screen("main_account")
     object Profile_info : Screen("profile_info")
     object Change_password : Screen("change_password")
@@ -33,7 +43,7 @@ sealed class Screen(val route: String) {
 fun NavigationController(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route,
+        startDestination = Screen.OnBoarding.route,
     ) {
         composable(Screen.Home.route) {   HomeScreen(
             userName = "John",
@@ -83,8 +93,12 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
                 NotificationData("n5", "Jane Smith", "liked your post", "1 hour ago"),
             )
             DefaultNotificationsPreview(sampleMessages,sampleNotifications) }
-        composable(Screen.Registration.route) { /* Registration Screen Content */ }
-        composable(Screen.Login.route) { /* Login Screen Content */ }
+        composable(Screen.OnBoarding.route) { OnboardingScreen(navController) }
+        composable(Screen.Registration.route) { RegistrationScreen(navController) }
+        composable(Screen.Verification.route) { VerificationScreen() }
+        composable(Screen.Login.route) { LoginScreen(navController) }
+        composable(Screen.ForgotPassword.route) { ForgetPasswordScreen() }
+
 
         composable(Screen.Main_account.route) {
             AccountMainScreen(navController = navController)
