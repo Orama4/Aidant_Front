@@ -26,15 +26,25 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 
 import com.example.clientaidant.ui.theme.ClientAidantTheme
-import getSampleFaqs
+
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), 1)
+        }
         setContent {
             ClientAidantTheme {
+
 
                 val navController = rememberNavController()
                 Box(
@@ -45,6 +55,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavigationController(navController)
                     AnimatedBottomNavigationBar(navController)
+
 
                 }
 
