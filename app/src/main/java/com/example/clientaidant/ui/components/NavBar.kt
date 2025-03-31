@@ -88,7 +88,7 @@ fun AnimatedBottomNavigationBar(navController: NavHostController) {
                 Screen.Tracking.route -> 1
                 Screen.Notifications.route -> 2
                 Screen.Main_account.route -> 3
-                else -> 0
+                else -> 3
             }
         }
     }

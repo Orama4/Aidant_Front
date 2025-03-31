@@ -3,6 +3,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,7 +33,7 @@ sealed class Screen(val route: String) {
 fun NavigationController(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Tracking.route,
+        startDestination = Screen.Home.route,
     ) {
         composable(Screen.Home.route) {   HomeScreen(
             userName = "John",
@@ -49,7 +50,16 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
             onRemoteAssistanceClick = { userId ->
             },
             onNotificationClick = {
-                navController.navigate(Screen.Notifications.route)
+                navController.navigate(Screen.Notifications.route) {
+                    // Pop up to the start destination (now Home)
+                    popUpTo(navController.graph.findStartDestination().id) { // Use findStartDestination() for robustness
+                        saveState = true
+                    }
+                    // Avoid multiple copies
+                    launchSingleTop = true
+                    // Restore state if needed
+                    restoreState = true
+                }
             },
             onBackClick = {
                 navController.popBackStack()
