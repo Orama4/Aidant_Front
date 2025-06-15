@@ -1,5 +1,6 @@
 package com.example.clientaidant.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,6 +36,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,16 +54,39 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.clientaidant.R
+import com.example.clientaidant.data.api.LoginRequest
+import com.example.clientaidant.data.viewmodels.AuthViewModel
 import com.example.clientaidant.ui.theme.AppColors
 import com.example.clientaidant.ui.theme.PlusJakartaSans
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(context : Context, authViewModel: AuthViewModel, navController: NavController) {
     var checkState by remember { mutableStateOf(false) }
     val textStates = remember { mutableStateListOf("", "") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+
+    val loginSuccess by authViewModel.loginSuccess.collectAsState()
+    val isLoading by authViewModel.loading.collectAsState()
+
+
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess != null) {
+            navController.navigate(Screen.Home.route){
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
+
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -180,7 +206,9 @@ fun LoginScreen(navController: NavController) {
 
                 // Login Button
                 Button(
-                    onClick = { /* Handle Login */ },
+                    onClick = { /* Handle Login */
+                        authViewModel.login(LoginRequest(textStates[0], textStates[1]))
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp),

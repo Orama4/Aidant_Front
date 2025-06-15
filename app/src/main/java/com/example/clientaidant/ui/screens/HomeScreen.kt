@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,12 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.clientaidant.data.api.ActiveEndUser
+import com.example.clientaidant.data.api.User
+import com.example.clientaidant.data.api.toAssistedUser
+import com.example.clientaidant.data.viewmodels.HelperViewModel
 import com.example.clientaidant.ui.theme.ClientAidantTheme
 
 enum class UserStatus(val displayName: String) {
@@ -48,9 +54,10 @@ val DividerColor = Color.LightGray.copy(alpha = 0.5f)
 val StatusGreen = Color(0xFF2E7D32)
 val StatusYellow = Color(0xFFF9A825)
 val StatusBlue = Color(0xFF1976D2)
-
+/*
 @Composable
 fun HomeScreen(
+    helperViewModel: HelperViewModel ,
     userName: String,
     notificationCount: Int,
     assistedUsers: List<AssistedUser>,
@@ -65,6 +72,15 @@ fun HomeScreen(
     val onTheMoveUsers = usersByStatus[UserStatus.ON_THE_MOVE] ?: emptyList()
     val waitingUsers = usersByStatus[UserStatus.WAITING] ?: emptyList()
     val inAssistanceUsers = usersByStatus[UserStatus.IN_ASSISTANCE] ?: emptyList()
+
+
+    LaunchedEffect(Unit) {
+        helperViewModel.fetchActiveEndUsers(helperUserId = 5)
+    }
+
+    val loading by helperViewModel.loading.collectAsState()
+    val users by helperViewModel.activeEndUsers.collectAsState()
+    val error by helperViewModel.error.collectAsState()
 
     Column(
         modifier = Modifier
@@ -154,6 +170,240 @@ fun HomeScreen(
         }
     }
 }
+*/
+@Composable
+fun HomeScreen(
+    getToken: suspend () -> User?,
+    helperViewModel: HelperViewModel,
+    activeUsers : State<List<ActiveEndUser>>,
+    userName: String,
+    notificationCount: Int,
+    onUserSearch: (String) -> Unit,
+    onTrackLocationClick: (userId: Int) -> Unit,
+    onRemoteAssistanceClick: (userId: Int) -> Unit,
+    onNotificationClick: () -> Unit,
+    onBackClick: () -> Unit
+) {
+    var searchText by remember { mutableStateOf("") }
+
+    val loading by helperViewModel.loading.collectAsState()
+    val error by helperViewModel.error.collectAsState()
+
+    // Hardcoder le mapping pour éliminer le problème de status
+    val assistedUsers by remember(activeUsers.value, searchText) {
+        derivedStateOf {
+            try {
+                Log.d("HomeScreen", "Processing ${activeUsers.value.size} active users")
+
+                val mapped = activeUsers.value.mapIndexed { index, activeUser ->
+                    Log.d("HomeScreen", "Mapping user $index: $activeUser")
+
+                    // HARDCODED STATUS - Alternance pour tester
+                    val hardcodedStatus = when (index % 3) {
+                        0 -> UserStatus.ON_THE_MOVE
+                        1 -> UserStatus.WAITING
+                        else -> UserStatus.IN_ASSISTANCE
+                    }
+
+                    val assistedUser = AssistedUser(
+                        id = activeUser.userId,
+                        name = activeUser.username,
+                        status = hardcodedStatus, // STATUS HARDCODÉ
+                        location = activeUser.addresse?: "not defined" ,
+                        avatarUrl = null,
+                        timestamp = activeUser.lastPosition?.timestamp ?: "Not defined"
+                    )
+
+                    Log.d("HomeScreen", "Mapped to: $assistedUser")
+                    assistedUser
+                }
+
+                val filtered = mapped.filter { it.name.contains(searchText, ignoreCase = true) }
+                Log.d("HomeScreen", "Filtered users: $filtered")
+                filtered
+            } catch (e: Exception) {
+                Log.e("HomeScreen", "Error mapping users", e)
+                emptyList()
+            }
+        }
+    }
+
+    val usersByStatus by remember(assistedUsers) {
+        derivedStateOf {
+            val grouped = assistedUsers.groupBy { it.status }
+            Log.d("HomeScreen", "Grouped by status: $grouped")
+            grouped
+        }
+    }
+
+    val onTheMoveUsers by remember(usersByStatus) {
+        derivedStateOf {
+            usersByStatus[UserStatus.ON_THE_MOVE] ?: emptyList()
+        }
+    }
+
+    val waitingUsers by remember(usersByStatus) {
+        derivedStateOf {
+            usersByStatus[UserStatus.WAITING] ?: emptyList()
+        }
+    }
+
+    val inAssistanceUsers by remember(usersByStatus) {
+        derivedStateOf {
+            usersByStatus[UserStatus.IN_ASSISTANCE] ?: emptyList()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val user = getToken()
+        val id = user?.id
+        if (id != null) {
+            helperViewModel.fetchActiveEndUsers(helperUserId = id)
+        } else {
+            helperViewModel.fetchActiveEndUsers(helperUserId = 12)
+        }
+    }
+
+    // Debugging - vérifiez ces logs
+    LaunchedEffect(activeUsers.value) {
+        Log.d("HomeScreen", "ActiveUsers count: ${activeUsers.value.size}")
+        Log.d("HomeScreen", "ActiveUsers: ${activeUsers.value}")
+    }
+
+    LaunchedEffect(assistedUsers) {
+        Log.d("HomeScreen", "AssistedUsers count: ${assistedUsers.size}")
+        Log.d("HomeScreen", "AssistedUsers: $assistedUsers")
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(WindowInsets.statusBars.asPaddingValues())
+            .background(Color.White)
+    ) {
+        TopAppBarSection(
+            userName = userName,
+            notificationCount = notificationCount,
+            onBackClick = onBackClick,
+            onNotificationClick = onNotificationClick,
+        )
+
+        Text(
+            text = buildAnnotatedString {
+                append("Hey $userName, ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("Good Afternoon!")
+                }
+            },
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+        )
+
+        SearchBar(
+            searchText = searchText,
+            onSearchTextChanged = {
+                searchText = it
+                onUserSearch(it)
+            }
+        )
+
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (error != null) {
+            Text(
+                text = "Error: $error",
+                color = Color.Red,
+                modifier = Modifier.padding(16.dp)
+            )
+        } else {
+            Text(
+                text = "Assisted Users (${assistedUsers.size})",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp)
+                    .weight(1f),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Section de debug pour voir TOUS les utilisateurs
+            /*    if (assistedUsers.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "DEBUG - TOUS LES UTILISATEURS:",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.Red,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        assistedUsers.forEach { user ->
+                            Text(
+                                text = "• ${user.name} - Status: ${user.status}",
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp),
+                                color = Color.Blue
+                            )
+                        }
+                    }
+                }
+                 */
+                // Message si aucun utilisateur
+                if (assistedUsers.isEmpty()) {
+                    item {
+                        Text(
+                            text = "Aucun utilisateur trouvé",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                if (onTheMoveUsers.isNotEmpty()) {
+                    item {
+                        UserSection(
+                            title = "${UserStatus.ON_THE_MOVE.displayName} (${onTheMoveUsers.size})",
+                            titleColor = StatusGreen,
+                            users = onTheMoveUsers,
+                            onTrackLocationClick = onTrackLocationClick,
+                            onRemoteAssistanceClick = onRemoteAssistanceClick
+                        )
+                    }
+                }
+
+                if (waitingUsers.isNotEmpty()) {
+                    item {
+                        UserSection(
+                            title = "${UserStatus.WAITING.displayName} (${waitingUsers.size})",
+                            titleColor = StatusYellow,
+                            users = waitingUsers,
+                            onTrackLocationClick = onTrackLocationClick,
+                            onRemoteAssistanceClick = onRemoteAssistanceClick
+                        )
+                    }
+                }
+
+                if (inAssistanceUsers.isNotEmpty()) {
+                    item {
+                        UserSection(
+                            title = "${UserStatus.IN_ASSISTANCE.displayName} (${inAssistanceUsers.size})",
+                            titleColor = StatusBlue,
+                            users = inAssistanceUsers,
+                            onTrackLocationClick = onTrackLocationClick,
+                            onRemoteAssistanceClick = onRemoteAssistanceClick
+                        )
+                    }
+                }
+
+                item { Spacer(Modifier.height(16.dp)) }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun TopAppBarSection(
@@ -362,7 +612,7 @@ fun UserCard(
         }
     }
 }
-
+/*
 @Composable
 fun DefaultPreviewOfHomeScreen() {
     val sampleUsers = listOf(
@@ -385,3 +635,4 @@ fun DefaultPreviewOfHomeScreen() {
         )
     }
 }
+*/

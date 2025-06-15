@@ -1,14 +1,26 @@
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.clientaidant.data.api.RetrofitClient
+import com.example.clientaidant.data.viewmodels.AuthViewModel
+import com.example.clientaidant.data.viewmodels.AuthViewModelFactory
+import com.example.clientaidant.data.viewmodels.HelperViewModel
+import com.example.clientaidant.repositories.AuthRepository
+import com.example.clientaidant.repositories.HelperRepository
 import com.example.clientaidant.ui.screens.ForgetPasswordScreen
 import com.example.clientaidant.ui.screens.LoginScreen
 import com.example.clientaidant.ui.screens.OnboardingScreen
@@ -39,21 +51,51 @@ sealed class Screen(val route: String) {
 
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
-fun NavigationController(navController: NavHostController = rememberNavController()) {
+fun NavigationController(navController: NavHostController = rememberNavController(),authRepository: AuthRepository) {
+
+    val context = LocalContext.current
+    val authViewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(authRepository,LocalContext.current)
+    )
+    val apiService = RetrofitClient.helperApiService
+    val helperViewModel = HelperViewModel(HelperRepository(apiService),context)
+    val isLoggedIn = remember {
+        derivedStateOf {
+            authViewModel.getToken() != null
+        }
+    }
+    Log.d("LOGGED__IN",isLoggedIn.value.toString())
+    val startDestination = if (isLoggedIn.value) Screen.Home.route else Screen.Login.route
     NavHost(
         navController = navController,
-        startDestination = Screen.OnBoarding.route,
+        startDestination = startDestination,
     ) {
-        composable(Screen.Home.route) {   HomeScreen(
+        composable(Screen.Home.route) {
+            val user = authViewModel.getUserInfo()
+            val id = user?.id
+            if (id != null) {
+                helperViewModel.fetchActiveEndUsers(helperUserId = id)
+            } else {
+                helperViewModel.fetchActiveEndUsers(helperUserId = 12)
+            }
+            val activeUser = helperViewModel.activeEndUsers.collectAsState();
+            HomeScreen(
+            getToken = {
+                authViewModel.getUserInfo()
+            },
+            helperViewModel =helperViewModel ,
+            activeUsers = activeUser,
             userName = "John",
             notificationCount = 2,
-            assistedUsers = listOf(
+           /* assistedUsers = listOf(
                 AssistedUser(1, "John Doe", "Main Hall", "29 JAN, 12:30", UserStatus.ON_THE_MOVE),
                 AssistedUser(2, "Jean Dupont", "Main Hall", "29 JAN, 12:30", UserStatus.WAITING),
                 AssistedUser(3, "Alice Martin", "Cafeteria", "29 JAN, 11:15", UserStatus.WAITING),
                 AssistedUser(4, "Bob Garcia", "Entrance B", "29 JAN, 12:35", UserStatus.IN_ASSISTANCE),
-            ),
+            ),*/
+
             onUserSearch = {  },
             onTrackLocationClick = {
             },
@@ -96,7 +138,7 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
         composable(Screen.OnBoarding.route) { OnboardingScreen(navController) }
         composable(Screen.Registration.route) { RegistrationScreen(navController) }
         composable(Screen.Verification.route) { VerificationScreen() }
-        composable(Screen.Login.route) { LoginScreen(navController) }
+        composable(Screen.Login.route) { LoginScreen(context,authViewModel,navController) }
         composable(Screen.ForgotPassword.route) { ForgetPasswordScreen() }
 
 

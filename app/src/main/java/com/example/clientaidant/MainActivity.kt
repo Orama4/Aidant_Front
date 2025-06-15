@@ -3,7 +3,6 @@ package com.example.clientaidant
 
 import AnimatedBottomNavigationBar
 import DefaultNotificationsPreview
-import DefaultPreviewOfHomeScreen
 import NavigationController
 import UserProfile
 import android.os.Bundle
@@ -31,7 +30,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
+import com.example.clientaidant.data.api.RetrofitClient
+import com.example.clientaidant.repositories.AuthRepository
 
 
 class MainActivity : ComponentActivity() {
@@ -43,6 +43,8 @@ class MainActivity : ComponentActivity() {
         ) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), 1)
         }
+        val apiService = RetrofitClient.authApiService
+        val authRepository = AuthRepository(apiService)
         setContent {
             ClientAidantTheme {
 
@@ -53,7 +55,7 @@ class MainActivity : ComponentActivity() {
                         .background(Color(0xFFF5F5F5))
                         .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
                 ) {
-                    NavigationController(navController)
+                    NavigationController(navController,authRepository)
 
                 }
 
