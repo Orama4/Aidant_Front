@@ -269,7 +269,7 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
             LaunchedEffect(connectionState.activeUsers, userID) {
                 val user = connectionState.activeUsers.find { it.userId.toString() == userID }
                 if (user != null) {
-                    Toast.makeText(context,user.toString(),Toast.LENGTH_LONG).show()
+                  //  Toast.makeText(context,user.toString(),Toast.LENGTH_LONG).show()
                     socketViewModel.selectUser(user)
                 }
             }

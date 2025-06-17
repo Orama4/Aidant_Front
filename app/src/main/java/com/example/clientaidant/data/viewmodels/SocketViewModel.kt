@@ -510,6 +510,7 @@ class SocketViewModel : ViewModel() {
             if (_selectedUser.value?.id == user.id) {
                 _selectedUser.value = user
                 _currentPositionLive.value = user.lastPosition?.lat?.let { Pair(it.toFloat(),user.lastPosition.lng.toFloat()) }
+                _currentHeadingLive.value = user.heading
             }
         }
         helperWebSocketService.locationUpdates.observeForever(locationUpdateObserver!!)

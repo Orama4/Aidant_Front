@@ -17,6 +17,7 @@ data class EndUserInfo(
     val userId: Int,
     val username: String,
     val lastPosition: Position? = null,
+    val heading : Float,
     val status: String,
     val isOnline: Boolean = false
 )
@@ -130,6 +131,12 @@ class HelperWebSocketClient(private var url: String) {
     }
 
     private fun parseEndUserInfo(userJson: JSONObject): EndUserInfo {
+        var gg = 0.0f ;
+        if(userJson.has("heading")){
+             gg = userJson.getDouble("heading").toFloat()
+             Log.d("GEGEGEGEG",gg.toString())
+
+         }
         val position = if (userJson.has("position")) {
             val posJson = userJson.getJSONObject("position")
             Position(
@@ -151,6 +158,7 @@ class HelperWebSocketClient(private var url: String) {
             userId = userJson.getInt("userId"),
             username = userJson.getString("username"),
             lastPosition = position,
+             heading = gg ,
             status = userJson.optString("status", "offline"),
             isOnline = userJson.optBoolean("isOnline", false)
         )
