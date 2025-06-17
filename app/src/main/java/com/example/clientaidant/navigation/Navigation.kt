@@ -1,6 +1,8 @@
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -11,21 +13,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.clientaidant.data.api.RetrofitClient
 import com.example.clientaidant.data.viewmodels.AuthViewModel
 import com.example.clientaidant.data.viewmodels.AuthViewModelFactory
 import com.example.clientaidant.data.viewmodels.HelperViewModel
+import com.example.clientaidant.data.viewmodels.SocketViewModel
 import com.example.clientaidant.repositories.AuthRepository
 import com.example.clientaidant.repositories.HelperRepository
 import com.example.clientaidant.ui.screens.ForgetPasswordScreen
+import com.example.clientaidant.ui.screens.HelperScreen
 import com.example.clientaidant.ui.screens.LoginScreen
 import com.example.clientaidant.ui.screens.OnboardingScreen
 import com.example.clientaidant.ui.screens.RegistrationScreen
 import com.example.clientaidant.ui.screens.TrackUser
+import com.example.clientaidant.ui.screens.TrackUserScreen
 import com.example.clientaidant.ui.screens.VerificationScreen
 
 sealed class Screen(val route: String) {
@@ -47,6 +54,13 @@ sealed class Screen(val route: String) {
     object Contact_support : Screen("contact_support")
     object Report_bug : Screen("report_bug")
     object Logout_delete : Screen("logout_delete")
+    object TrackingUser : Screen("track") {
+        const val routeWithArgs = "track/{userId}"
+        fun createRoute(userId: String) = "track/$userId"
+    }
+
+
+    object Test_webSocket :Screen("test_websocket")
 
 
 }
@@ -59,6 +73,8 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
     val authViewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(authRepository,LocalContext.current)
     )
+
+    val socketViewModel = SocketViewModel()
     val apiService = RetrofitClient.helperApiService
     val helperViewModel = HelperViewModel(HelperRepository(apiService),context)
     val isLoggedIn = remember {
@@ -115,7 +131,8 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
             },
             onBackClick = {
                 navController.popBackStack()
-            }
+            },
+                navController = navController
         ) }
         composable(Screen.Tracking.route) { TrackUser() }
         composable(Screen.Notifications.route) {
@@ -195,6 +212,73 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
                 println("Logging out...")
             }, onDeleteAccount = {println("Deleting account...")})
 
+        }
+        composable (Screen.Test_webSocket.route){
+            val socketViewMode = SocketViewModel()
+            HelperScreen(socketViewMode)
+        }
+      /*  composable(
+            route = "${Screen.TrackingUser.route}/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userID = backStackEntry.arguments?.getString("userId") ?: ""
+            val  socketViewModel = SocketViewModel()
+            val User = authViewModel.getUserInfo()
+            val helperID = User?.id
+            Log.d("HELPER ID IS ",helperID.toString())
+            if (helperID != null) {
+                socketViewModel.connectToServer(helperID)
+            }
+            val connectionState by socketViewModel.connectionState.collectAsState()
+
+           // je veux recupuer le user qui a userId == userID
+            val user = connectionState.activeUsers.find { it.userId.toString() == userID }
+
+            if (user != null) {
+                Toast.makeText(context,user.toString(),Toast.LENGTH_LONG).show()
+                socketViewModel.selectUser(user)
+            }else{
+                Toast.makeText(context,"THE USER IS NULL ",Toast.LENGTH_LONG).show()
+
+            }
+
+
+
+
+            socketViewModel.loadGeoJSONFromAssets(context)
+           TrackUserScreen(socketViewModel)
+        }*/
+        composable(
+            route = "${Screen.TrackingUser.route}/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userID = backStackEntry.arguments?.getString("userId") ?: ""
+            val User = authViewModel.getUserInfo()
+            val helperID = User?.id
+
+            // Connecter seulement si pas déjà connecté
+            LaunchedEffect(helperID) {
+                if (helperID != null && !socketViewModel.isConnected()) {
+                    socketViewModel.connectToServer(helperID)
+                }
+            }
+
+            val connectionState by socketViewModel.connectionState.collectAsState()
+
+            // Utiliser LaunchedEffect pour éviter les recompositions infinies
+            LaunchedEffect(connectionState.activeUsers, userID) {
+                val user = connectionState.activeUsers.find { it.userId.toString() == userID }
+                if (user != null) {
+                    Toast.makeText(context,user.toString(),Toast.LENGTH_LONG).show()
+                    socketViewModel.selectUser(user)
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                socketViewModel.loadGeoJSONFromAssets(context)
+            }
+
+            TrackUserScreen(navController,socketViewModel)
         }
 
     }

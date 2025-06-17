@@ -1,4 +1,5 @@
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,8 +9,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Notifications
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.buildAnnotatedString
@@ -26,6 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.clientaidant.data.api.ActiveEndUser
 import com.example.clientaidant.data.api.User
 import com.example.clientaidant.data.api.toAssistedUser
@@ -44,6 +49,7 @@ data class AssistedUser(
     val location: String,
     val timestamp: String,
     val status: UserStatus,
+    val status1 :String ,
     val avatarUrl: String? = null
 )
 
@@ -182,7 +188,8 @@ fun HomeScreen(
     onTrackLocationClick: (userId: Int) -> Unit,
     onRemoteAssistanceClick: (userId: Int) -> Unit,
     onNotificationClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    navController: NavController
 ) {
     var searchText by remember { mutableStateOf("") }
 
@@ -211,7 +218,8 @@ fun HomeScreen(
                         status = hardcodedStatus, // STATUS HARDCODÉ
                         location = activeUser.addresse?: "not defined" ,
                         avatarUrl = null,
-                        timestamp = activeUser.lastPosition?.timestamp ?: "Not defined"
+                        timestamp = activeUser.lastPosition?.timestamp ?: "Not defined",
+                        status1 = activeUser.status
                     )
 
                     Log.d("HomeScreen", "Mapped to: $assistedUser")
@@ -360,43 +368,55 @@ fun HomeScreen(
                             color = Color.Gray
                         )
                     }
-                }
-
-                if (onTheMoveUsers.isNotEmpty()) {
+                }else{
                     item {
                         UserSection(
-                            title = "${UserStatus.ON_THE_MOVE.displayName} (${onTheMoveUsers.size})",
+                           // title = "${UserStatus.ON_THE_MOVE.displayName} (${onTheMoveUsers.size})",
+                            title = "",
                             titleColor = StatusGreen,
                             users = onTheMoveUsers,
                             onTrackLocationClick = onTrackLocationClick,
-                            onRemoteAssistanceClick = onRemoteAssistanceClick
+                            onRemoteAssistanceClick = onRemoteAssistanceClick,
+                            navController = navController
                         )
                     }
                 }
 
-                if (waitingUsers.isNotEmpty()) {
-                    item {
-                        UserSection(
-                            title = "${UserStatus.WAITING.displayName} (${waitingUsers.size})",
-                            titleColor = StatusYellow,
-                            users = waitingUsers,
-                            onTrackLocationClick = onTrackLocationClick,
-                            onRemoteAssistanceClick = onRemoteAssistanceClick
-                        )
-                    }
-                }
+                /*      if (onTheMoveUsers.isNotEmpty()) {
+                       item {
+                           UserSection(
+                               title = "${UserStatus.ON_THE_MOVE.displayName} (${onTheMoveUsers.size})",
+                               titleColor = StatusGreen,
+                               users = onTheMoveUsers,
+                               onTrackLocationClick = onTrackLocationClick,
+                               onRemoteAssistanceClick = onRemoteAssistanceClick
+                           )
+                       }
+                   }
+
+                   if (waitingUsers.isNotEmpty()) {
+                       item {
+                           UserSection(
+                               title = "${UserStatus.WAITING.displayName} (${waitingUsers.size})",
+                               titleColor = StatusYellow,
+                               users = waitingUsers,
+                               onTrackLocationClick = onTrackLocationClick,
+                               onRemoteAssistanceClick = onRemoteAssistanceClick
+                           )
+                       }
+                   }
 
                 if (inAssistanceUsers.isNotEmpty()) {
-                    item {
-                        UserSection(
-                            title = "${UserStatus.IN_ASSISTANCE.displayName} (${inAssistanceUsers.size})",
-                            titleColor = StatusBlue,
-                            users = inAssistanceUsers,
-                            onTrackLocationClick = onTrackLocationClick,
-                            onRemoteAssistanceClick = onRemoteAssistanceClick
-                        )
-                    }
-                }
+                       item {
+                           UserSection(
+                               title = "${UserStatus.IN_ASSISTANCE.displayName} (${inAssistanceUsers.size})",
+                               titleColor = StatusBlue,
+                               users = inAssistanceUsers,
+                               onTrackLocationClick = onTrackLocationClick,
+                               onRemoteAssistanceClick = onRemoteAssistanceClick
+                           )
+                       }
+                   } */
 
                 item { Spacer(Modifier.height(16.dp)) }
             }
@@ -498,7 +518,8 @@ fun UserSection(
     titleColor: Color,
     users: List<AssistedUser>,
     onTrackLocationClick: (userId: Int) -> Unit,
-    onRemoteAssistanceClick: (userId: Int) -> Unit
+    onRemoteAssistanceClick: (userId: Int) -> Unit,
+    navController: NavController
 ) {
     Column {
         Text(
@@ -513,6 +534,7 @@ fun UserSection(
         users.forEach { user ->
             UserCard(
                 user = user,
+                navController = navController,
                 onTrackLocationClick = onTrackLocationClick,
                 onRemoteAssistanceClick = onRemoteAssistanceClick
             )
@@ -526,9 +548,12 @@ fun UserSection(
 @Composable
 fun UserCard(
     user: AssistedUser,
+    navController: NavController,
     onTrackLocationClick: (userId: Int) -> Unit,
     onRemoteAssistanceClick: (userId: Int) -> Unit
 ) {
+    val context =  LocalContext.current
+
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -549,10 +574,51 @@ fun UserCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = user.name,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                )
+               Row (
+
+               ){
+                   Text(
+                   text = user.name,
+                   style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+               );
+                   Text(text = " | ",
+                   style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+               )
+
+                       Icon(
+                           imageVector = when {
+                               user.status1 == "online" -> Icons.Default.Circle
+                               user.status1 == "offline" -> Icons.Default.Circle
+                               else -> Icons.Default.RadioButtonUnchecked
+                           },
+                           contentDescription = "Status",
+                           modifier = Modifier.size(12.dp),
+                           tint = when {
+                               user.status1 == "online" -> Color.Green
+                               user.status1 == "offline" -> Color.Red
+                               else -> Color.Gray
+                           }
+                       )
+
+                       Spacer(modifier = Modifier.width(4.dp))
+
+                       Text(
+                           text = when {
+                               user.status1 == "online" -> "En ligne"
+                               user.status1 == "offline" -> "Hors ligne"
+                               else -> user.status1.capitalize()
+                           },
+                           style = MaterialTheme.typography.bodySmall,
+                           color =  when {
+                               user.status1 == "online" -> Color.Green
+                               user.status1 == "offline" -> Color.Red
+                               else -> Color.Gray
+                           }
+                       )
+                   }
+
+
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Outlined.LocationOn,
@@ -587,7 +653,16 @@ fun UserCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedButton(
-                onClick = { onTrackLocationClick(user.id) },
+                onClick = { onTrackLocationClick(user.id)
+
+                    if(user.status1 =="offline") {
+                        Toast.makeText(context,"L'utilisateur ${user.name} est hors Ligne",Toast.LENGTH_LONG).show()
+                    }else {
+                        Toast.makeText(context,user.id.toString(),Toast.LENGTH_LONG).show()
+                        navController.navigate(Screen.TrackingUser.createRoute(user.id.toString()))
+                    }
+
+                          },
                 modifier = Modifier
                     .weight(1f)
                     .height(40.dp),

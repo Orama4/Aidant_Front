@@ -26,6 +26,7 @@ fun ActiveEndUser.toAssistedUser(): AssistedUser {
             "in_assistance" -> UserStatus.IN_ASSISTANCE
             else -> UserStatus.WAITING
         },
+        status1 = this.status,
         avatarUrl = null // Tu peux mettre une URL réelle si tu l’as
     )
 }
