@@ -250,17 +250,8 @@ fun HomeScreen(
         }
     }
 
-    val waitingUsers by remember(usersByStatus) {
-        derivedStateOf {
-            usersByStatus[UserStatus.WAITING] ?: emptyList()
-        }
-    }
 
-    val inAssistanceUsers by remember(usersByStatus) {
-        derivedStateOf {
-            usersByStatus[UserStatus.IN_ASSISTANCE] ?: emptyList()
-        }
-    }
+
 
     LaunchedEffect(Unit) {
         val user = getToken()
@@ -336,6 +327,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 20.dp)
+                    .fillMaxHeight()
                     .weight(1f),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -374,7 +366,7 @@ fun HomeScreen(
                            // title = "${UserStatus.ON_THE_MOVE.displayName} (${onTheMoveUsers.size})",
                             title = "",
                             titleColor = StatusGreen,
-                            users = onTheMoveUsers,
+                            users = assistedUsers,
                             onTrackLocationClick = onTrackLocationClick,
                             onRemoteAssistanceClick = onRemoteAssistanceClick,
                             navController = navController

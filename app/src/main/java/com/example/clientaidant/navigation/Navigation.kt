@@ -97,6 +97,8 @@ fun NavigationController(navController: NavHostController = rememberNavControlle
                 helperViewModel.fetchActiveEndUsers(helperUserId = 12)
             }
             val activeUser = helperViewModel.activeEndUsers.collectAsState();
+
+            Log.d("ACTIVE USERS",activeUser.toString())
             HomeScreen(
             getToken = {
                 authViewModel.getUserInfo()
